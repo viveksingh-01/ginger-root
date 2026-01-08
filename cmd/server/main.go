@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/viveksingh-01/ginger-root/internal/database"
 )
 
 func main() {
@@ -14,6 +15,8 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	database.Connect(os.Getenv("MONGODB_URI"))
 
 	port := os.Getenv("PORT")
 	if port == "" {
