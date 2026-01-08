@@ -1,0 +1,6 @@
+
+# Output of go build
+/bin/
+
+# Environment file
+.env
