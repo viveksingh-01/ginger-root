@@ -20,6 +20,11 @@ func main() {
 		port = "8080"
 	}
 
+	gin.SetMode(gin.ReleaseMode)
+
 	r := gin.Default()
+	r.SetTrustedProxies(nil)
+
+	log.Println("Server started on port:", port)
 	r.Run(":" + port)
 }
