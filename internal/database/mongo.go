@@ -17,11 +17,13 @@ func Connect(uri string) (*mongo.Client, error) {
 	// Create a new client and connect to the server
 	client, err := mongo.Connect(opts)
 	if err != nil {
+		log.Println("Couldn't connect to Mongo DB.", err)
 		return nil, err
 	}
 
 	// Send a ping to confirm a successful connection
 	if err := client.Ping(context.TODO(), nil); err != nil {
+		log.Println("Error occurred while pinging to Mongo DB.", err)
 		return nil, err
 	}
 
