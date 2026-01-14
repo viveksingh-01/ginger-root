@@ -8,6 +8,7 @@ import (
 type Config struct {
 	Port     string
 	MongoURI string
+	Database string
 }
 
 func Load() (*Config, error) {
@@ -18,7 +19,8 @@ func Load() (*Config, error) {
 
 	cfg := &Config{
 		Port:     viper.GetString("PORT"),
-		MongoURI: viper.GetString("MONGODB_URI"),
+		MongoURI: viper.GetString("MONGO_URI"),
+		Database: viper.GetString("MONGO_DB"),
 	}
 
 	return cfg, nil
