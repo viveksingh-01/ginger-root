@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
@@ -21,6 +23,15 @@ func Load() (*Config, error) {
 		Port:     viper.GetString("PORT"),
 		MongoURI: viper.GetString("MONGO_URI"),
 		Database: viper.GetString("MONGO_DB"),
+	}
+
+	// Basic validation
+	if cfg.MongoURI == "" {
+		return nil, fmt.Errorf("MONGO_URI is required")
+	}
+
+	if cfg.Database == "" {
+		return nil, fmt.Errorf("MONGO_DB is required")
 	}
 
 	return cfg, nil
