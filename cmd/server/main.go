@@ -10,8 +10,14 @@ import (
 
 func main() {
 	log.Println("Welcome to Ginger API.")
-	cfg, _ := config.Load()
 
+	// Load configurations
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err.Error())
+	}
+
+	// Connect to DB
 	database.Connect(cfg.MongoURI)
 
 	gin.SetMode(gin.ReleaseMode)
