@@ -14,11 +14,17 @@ func main() {
 	// Load configurations
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err.Error())
+		log.Fatalf("Failed to load config: %v", err.Error())
 	}
 
 	// Connect to DB
-	database.Connect(cfg.MongoURI)
+	mongoClient, err := database.Connect(cfg.MongoURI)
+	if err != nil {
+		log.Fatalf("Failed to connect to MongoDB: %v", err.Error())
+	}
+
+	db := mongoClient.Database(cfg.Database)
+	log.Println("Successfully accessed DB:", db.Name())
 
 	gin.SetMode(gin.ReleaseMode)
 
