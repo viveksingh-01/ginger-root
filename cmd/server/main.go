@@ -6,10 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/viveksingh-01/ginger-root/internal/config"
 	"github.com/viveksingh-01/ginger-root/internal/database"
+	"github.com/viveksingh-01/ginger-root/internal/restaurant"
 )
 
 func main() {
 	log.Println("Welcome to Ginger API.")
+	gin.SetMode(gin.ReleaseMode)
+
+	r := gin.Default()
+	r.SetTrustedProxies(nil)
 
 	// Load configurations
 	cfg, err := config.Load()
@@ -22,14 +27,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err.Error())
 	}
-
 	db := mongoClient.Database(cfg.Database)
-	log.Println("Successfully accessed DB:", db.Name())
 
-	gin.SetMode(gin.ReleaseMode)
-
-	r := gin.Default()
-	r.SetTrustedProxies(nil)
+	// Integrate restaurant's repository, service and handler
+	restaurantRepo := restaurant.NewRepository(db)
+	restaurantService := restaurant.NewService(restaurantRepo)
+	restaurantHandler := restaurant.NewHandler(restaurantService)
+	// Register route for restaurant-handler
+	restaurant.RegisterRoutes(r.Group("/"), restaurantHandler)
 
 	log.Println("Server started on port:", cfg.Port)
 	r.Run(":" + cfg.Port)
