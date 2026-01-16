@@ -14,6 +14,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
+	apiPath := r.Group("/api/v1")
 	r.SetTrustedProxies(nil)
 
 	// Load configurations
@@ -34,7 +35,7 @@ func main() {
 	restaurantService := restaurant.NewService(restaurantRepo)
 	restaurantHandler := restaurant.NewHandler(restaurantService)
 	// Register route for restaurant-handler
-	restaurant.RegisterRoutes(r.Group("/"), restaurantHandler)
+	restaurant.RegisterRoutes(apiPath, restaurantHandler)
 
 	log.Println("Server started on port:", cfg.Port)
 	r.Run(":" + cfg.Port)
