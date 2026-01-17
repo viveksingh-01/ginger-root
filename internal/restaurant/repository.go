@@ -5,6 +5,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // Purpose:
@@ -24,7 +25,14 @@ func NewRepository(db *mongo.Database) *Repository {
 	return &Repository{collection: db.Collection("restaurants")}
 }
 
-func (r *Repository) List(ctx context.Context) ([]Restaurant, error) {
+func (r *Repository) List(ctx context.Context, limit, offset int64) ([]Restaurant, error) {
+	// Creates MongoDB query options. (Think of it like: “Extra instructions for MongoDB”)
+	opts := options.Find()
+	// Limits how many documents MongoDB returns
+	opts.SetLimit(limit)
+	// Skips offset number of documents
+	opts.SetSkip(offset)
+
 	// Find queries the MongoDB collection
 	// bson.M{} is an empty filter, meaning: “Return all documents in the collection”
 	// The result is a cursor, which allows iterating over the documents

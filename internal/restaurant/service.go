@@ -26,6 +26,6 @@ func NewService(repo *Repository) *Service {
 // 2. The service forwards the call to Repository.List
 // 3. The repository queries the database
 // 4. Results are returned back up the stack
-func (s *Service) List(ctx context.Context) ([]Restaurant, error) {
-	return s.repository.List(ctx)
+func (s *Service) List(ctx context.Context, limit, offset int64) ([]Restaurant, error) {
+	return s.repository.List(ctx, limit, offset)
 }

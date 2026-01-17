@@ -3,6 +3,7 @@ package restaurant
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,12 +31,16 @@ func NewHandler(s *Service) *Handler {
 
 // This method is an HTTP endpoint (registered to a route)
 func (h *Handler) List(c *gin.Context) {
+	// Read limit and offset query params from the request and parse them to int64 type
+	limit, _ := strconv.ParseInt(c.DefaultQuery("limit", "20"), 10, 64)
+	offset, _ := strconv.ParseInt(c.DefaultQuery("offset", "0"), 10, 64)
+
 	// c.Request.Context() extracts the standard Go context.Context
 	// This context:
 	// 1. Is cancelled if the client disconnects
 	// 2. Carries request-scoped deadlines
 	// The handler calls the service to fetch list of restaurants
-	restaurants, err := h.service.List(c.Request.Context())
+	restaurants, err := h.service.List(c.Request.Context(), limit, offset)
 	if err != nil {
 		log.Println("Error occurred while fetching restaurants", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch restaurants"})
