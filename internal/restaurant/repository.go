@@ -36,7 +36,7 @@ func (r *Repository) List(ctx context.Context, limit, offset int64) ([]Restauran
 	// Find queries the MongoDB collection
 	// bson.M{} is an empty filter, meaning: “Return all documents in the collection”
 	// The result is a cursor, which allows iterating over the documents
-	cursor, err := r.collection.Find(ctx, bson.M{})
+	cursor, err := r.collection.Find(ctx, bson.M{}, opts)
 	if err != nil {
 		return nil, err
 	}
