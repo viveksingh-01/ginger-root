@@ -52,5 +52,10 @@ func (h *Handler) List(c *gin.Context) {
 	// Gin automatically:
 	// * Sets Content-Type: application/json
 	// * Marshals Go structs into JSON
-	c.JSON(http.StatusOK, gin.H{"data": restaurants})
+	c.JSON(http.StatusOK, gin.H{
+		"count":  len(restaurants),
+		"data":   restaurants,
+		"limit":  limit,
+		"offset": offset,
+	})
 }
