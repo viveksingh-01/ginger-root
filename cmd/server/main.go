@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -48,6 +49,11 @@ func main() {
 	// Register route for restaurant-handler
 	restaurant.RegisterRoutes(apiPath, restaurantHandler)
 
+	server := &http.Server{
+		Addr:    ":" + cfg.Port,
+		Handler: r,
+	}
+
 	log.Println("Server started on port:", cfg.Port)
-	r.Run(":" + cfg.Port)
+	server.ListenAndServe()
 }
