@@ -1,9 +1,11 @@
 package restaurant
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,12 +37,19 @@ func (h *Handler) List(c *gin.Context) {
 	limit, _ := strconv.ParseInt(c.DefaultQuery("limit", "20"), 10, 64)
 	offset, _ := strconv.ParseInt(c.DefaultQuery("offset", "0"), 10, 64)
 
-	// c.Request.Context() extracts the standard Go context.Context
-	// This context:
+	// Create a context that:
+	// 1. Automatically cancels after 3 seconds
+	// 2. Signals MongoDB to stop work
+	// 3. Frees resources
+
+	// c.Request.Context() extracts the standard Go context.Context, it:
 	// 1. Is cancelled if the client disconnects
 	// 2. Carries request-scoped deadlines
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 3*time.Second)
+	defer cancel()
+
 	// The handler calls the service to fetch list of restaurants
-	restaurants, err := h.service.List(c.Request.Context(), limit, offset)
+	restaurants, err := h.service.List(ctx, limit, offset)
 	if err != nil {
 		log.Println("Error occurred while fetching restaurants", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch restaurants"})
@@ -59,3 +68,24 @@ func (h *Handler) List(c *gin.Context) {
 		"offset": offset,
 	})
 }
+
+// IMPORTANT:
+
+// Context timeouts — WHY THIS IS CRITICAL
+// What is a context?
+// A context:
+// * Carries deadlines
+// * Can be cancelled
+// * Propagates across layers
+
+// What happens without this?
+// 1. Mongo query hangs
+// 2. Goroutine never exits
+// 3. App slows down under load
+
+// Why do we pass ctx everywhere? - h.service.List(ctx, limit, offset)
+// Because:
+// 1. Handler controls request lifetime
+// 2. Service & repository obey it
+// 3. Cancellation propagates downward
+// This is idiomatic Go.
