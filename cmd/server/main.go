@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/viveksingh-01/ginger-root/internal/config"
 	"github.com/viveksingh-01/ginger-root/internal/database"
@@ -14,7 +15,6 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
-	apiPath := r.Group("/api/v1")
 	r.SetTrustedProxies(nil)
 
 	// Load configurations
@@ -22,6 +22,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err.Error())
 	}
+
+	// Enable CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{cfg.AllowedOrigin},
+		AllowMethods:     []string{"GET", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}))
+
+	// Create route group
+	apiPath := r.Group("/api/v1")
 
 	// Connect to DB
 	mongoClient, err := database.Connect(cfg.MongoURI)

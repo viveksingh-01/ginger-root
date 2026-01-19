@@ -8,9 +8,10 @@ import (
 )
 
 type Config struct {
-	Port     string
-	MongoURI string
-	Database string
+	Port          string
+	MongoURI      string
+	Database      string
+	AllowedOrigin string
 }
 
 func Load() (*Config, error) {
@@ -20,9 +21,10 @@ func Load() (*Config, error) {
 	viper.AutomaticEnv()
 
 	cfg := &Config{
-		Port:     viper.GetString("PORT"),
-		MongoURI: viper.GetString("MONGO_URI"),
-		Database: viper.GetString("MONGO_DB"),
+		Port:          viper.GetString("PORT"),
+		MongoURI:      viper.GetString("MONGO_URI"),
+		Database:      viper.GetString("MONGO_DB"),
+		AllowedOrigin: viper.GetString("ALLOWED_ORIGIN"),
 	}
 
 	// Basic validation
