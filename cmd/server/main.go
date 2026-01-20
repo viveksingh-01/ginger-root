@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -54,8 +59,27 @@ func main() {
 		Handler: r,
 	}
 
-	log.Printf("Server listening on %s", server.Addr)
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("Failed to start the server: %s", err)
-	}
+	// Channel to listen for OS signals
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+
+	// Start server in goroutine
+	go func() {
+		log.Printf("Server listening on %s", server.Addr)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Failed to start the server: %s", err)
+		}
+	}()
+
+	// Block until signal received
+	<-shutdown
+	log.Println("Shutting down server...")
+
+	// Create context with timeout for graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Graceful shutdown with timeout
+	server.Shutdown(ctx)
+	log.Println("Server exited successfully.")
 }
