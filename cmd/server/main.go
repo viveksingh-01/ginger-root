@@ -54,6 +54,8 @@ func main() {
 		Handler: r,
 	}
 
-	log.Println("Server started on port:", cfg.Port)
-	server.ListenAndServe()
+	log.Printf("Server listening on %s", server.Addr)
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("Failed to start the server: %s", err)
+	}
 }
