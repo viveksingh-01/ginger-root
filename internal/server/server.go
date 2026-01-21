@@ -32,6 +32,9 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 		AllowCredentials: true,
 	}))
 
+	// Use request-logger
+	r.Use(RequestLogger())
+
 	// Create route group
 	apiPath := r.Group("/api/v1")
 
