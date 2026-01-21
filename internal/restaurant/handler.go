@@ -2,7 +2,6 @@ package restaurant
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -51,8 +50,7 @@ func (h *Handler) List(c *gin.Context) {
 	// The handler calls the service to fetch list of restaurants
 	restaurants, err := h.service.List(ctx, limit, offset)
 	if err != nil {
-		log.Println("Error occurred while fetching restaurants", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch restaurants"})
+		h.internalError(c, err)
 		return
 	}
 
