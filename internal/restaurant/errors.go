@@ -8,6 +8,10 @@ import (
 	"github.com/viveksingh-01/ginger-root/internal/httpx"
 )
 
+func (h *Handler) badRequest(c *gin.Context, code, message string) {
+	h.respondError(c, http.StatusBadRequest, code, message)
+}
+
 func (h *Handler) internalError(c *gin.Context, err error) {
 	requestID, _ := c.Get("request_id")
 

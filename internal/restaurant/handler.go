@@ -33,8 +33,20 @@ func NewHandler(s *Service) *Handler {
 // This method is an HTTP endpoint (registered to a route)
 func (h *Handler) List(c *gin.Context) {
 	// Read limit and offset query params from the request and parse them to int64 type
-	limit, _ := strconv.ParseInt(c.DefaultQuery("limit", "20"), 10, 64)
-	offset, _ := strconv.ParseInt(c.DefaultQuery("offset", "0"), 10, 64)
+	limitStr := c.DefaultQuery("limit", "10")
+	offsetStr := c.DefaultQuery("offset", "0")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 || limit > 100 {
+		h.badRequest(c, "INVALID_LIMIT", "limit must be between 1 and 100")
+		return
+	}
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil || offset < 0 {
+		h.badRequest(c, "INVALID_OFFSET", "offset must be >= 0")
+		return
+	}
 
 	// Create a context that:
 	// 1. Automatically cancels after 3 seconds
@@ -48,7 +60,7 @@ func (h *Handler) List(c *gin.Context) {
 	defer cancel()
 
 	// The handler calls the service to fetch list of restaurants
-	restaurants, err := h.service.List(ctx, limit, offset)
+	restaurants, err := h.service.List(ctx, int64(limit), int64(offset))
 	if err != nil {
 		h.internalError(c, err)
 		return
