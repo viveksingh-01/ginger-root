@@ -25,7 +25,7 @@ func NewRepository(db *mongo.Database) *Repository {
 	return &Repository{collection: db.Collection("restaurants")}
 }
 
-func (r *Repository) List(ctx context.Context, limit, offset int64) ([]Restaurant, error) {
+func (r *Repository) List(ctx context.Context, limit, offset int64, f Filter) ([]Restaurant, error) {
 	// Creates MongoDB query options. (Think of it like: “Extra instructions for MongoDB”)
 	opts := options.Find()
 	// Limits how many documents MongoDB returns
@@ -33,10 +33,19 @@ func (r *Repository) List(ctx context.Context, limit, offset int64) ([]Restauran
 	// Skips offset number of documents
 	opts.SetSkip(offset)
 
-	// Find queries the MongoDB collection
 	// bson.M{} is an empty filter, meaning: “Return all documents in the collection”
+	// How this works?
+	// Request: GET /restaurants?veg=true -->
+	// Code: filter := bson.M{ "veg": true } -->
+	// Mongo: db.restaurants.find({ veg: true })
+	filter := bson.M{}
+	if f.Veg != nil {
+		filter["veg"] = *f.Veg
+	}
+
+	// Find - queries the MongoDB collection with context, filter and options
 	// The result is a cursor, which allows iterating over the documents
-	cursor, err := r.collection.Find(ctx, bson.M{}, opts)
+	cursor, err := r.collection.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err
 	}

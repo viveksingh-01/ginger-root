@@ -32,7 +32,7 @@ func NewHandler(s *Service) *Handler {
 
 // This method is an HTTP endpoint (registered to a route)
 func (h *Handler) List(c *gin.Context) {
-	// Read limit and offset query params from the request and parse them to int64 type
+	// Read limit and offset query params from the request
 	limitStr := c.DefaultQuery("limit", "10")
 	offsetStr := c.DefaultQuery("offset", "0")
 
@@ -48,6 +48,19 @@ func (h *Handler) List(c *gin.Context) {
 		return
 	}
 
+	// Filter veg-only restaurants
+	var veg *bool
+	if vegStr := c.Query("veg"); vegStr != "" {
+		v, err := strconv.ParseBool(vegStr)
+		if err != nil {
+			h.badRequest(c, "INVALID_VEG_FILTER_VALUE", "veg must be true or false")
+			return
+		}
+		veg = &v
+	}
+
+	filter := Filter{Veg: veg}
+
 	// Create a context that:
 	// 1. Automatically cancels after 3 seconds
 	// 2. Signals MongoDB to stop work
@@ -60,7 +73,7 @@ func (h *Handler) List(c *gin.Context) {
 	defer cancel()
 
 	// The handler calls the service to fetch list of restaurants
-	restaurants, err := h.service.List(ctx, int64(limit), int64(offset))
+	restaurants, err := h.service.List(ctx, int64(limit), int64(offset), filter)
 	if err != nil {
 		h.internalError(c, err)
 		return

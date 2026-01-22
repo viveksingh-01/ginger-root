@@ -32,12 +32,12 @@ const (
 // 2. The service forwards the call to Repository.List
 // 3. The repository queries the database
 // 4. Results are returned back up the stack
-func (s *Service) List(ctx context.Context, limit, offset int64) ([]Restaurant, error) {
+func (s *Service) List(ctx context.Context, limit, offset int64, filter Filter) ([]Restaurant, error) {
 	if limit < 0 || limit > maxLimit {
 		limit = defaultLimit
 	}
 	if offset < 0 {
 		offset = 0
 	}
-	return s.repository.List(ctx, limit, offset)
+	return s.repository.List(ctx, limit, offset, filter)
 }
