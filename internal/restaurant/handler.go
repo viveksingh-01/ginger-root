@@ -59,7 +59,21 @@ func (h *Handler) List(c *gin.Context) {
 		veg = &v
 	}
 
-	filter := Filter{Veg: veg}
+	// Filter by minimum rating
+	var minRating *float64
+	if ratingStr := c.Query("minRating"); ratingStr != "" {
+		r, err := strconv.ParseFloat(ratingStr, 64)
+		if err != nil {
+			h.badRequest(c, "INVALID_RATING_VALUE", "minRating must be between 0 and 5")
+			return
+		}
+		minRating = &r
+	}
+
+	filter := Filter{
+		Veg:       veg,
+		MinRating: minRating,
+	}
 
 	// Create a context that:
 	// 1. Automatically cancels after 3 seconds

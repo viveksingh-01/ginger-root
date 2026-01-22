@@ -1,7 +1,8 @@
 package restaurant
 
 type Filter struct {
-	Veg *bool
+	Veg       *bool
+	MinRating *float64
 }
 
 // NOTE:

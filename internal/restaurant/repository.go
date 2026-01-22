@@ -43,6 +43,14 @@ func (r *Repository) List(ctx context.Context, limit, offset int64, f Filter) ([
 		filter["veg"] = *f.Veg
 	}
 
+	// Average-rating filter
+	if f.MinRating != nil {
+		// Apply 'greater than or equal to' condition for min-rating in Mongo query
+		filter["avg_rating"] = bson.M{
+			"$gte": *f.MinRating,
+		}
+	}
+
 	// Find - queries the MongoDB collection with context, filter and options
 	// The result is a cursor, which allows iterating over the documents
 	cursor, err := r.collection.Find(ctx, filter, opts)
