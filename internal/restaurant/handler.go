@@ -63,7 +63,7 @@ func (h *Handler) List(c *gin.Context) {
 	var minRating *float64
 	if ratingStr := c.Query("minRating"); ratingStr != "" {
 		r, err := strconv.ParseFloat(ratingStr, 64)
-		if err != nil {
+		if err != nil || r < 0 || r > 5 {
 			h.badRequest(c, "INVALID_RATING_VALUE", "minRating must be between 0 and 5")
 			return
 		}
