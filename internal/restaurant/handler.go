@@ -75,6 +75,27 @@ func (h *Handler) List(c *gin.Context) {
 		MinRating: minRating,
 	}
 
+	// Apply sorting
+	sortBy := c.DefaultQuery("sortBy", "rating")
+	order := c.DefaultQuery("order", "desc")
+
+	// Convert client-facing sort parameter into a safe MongoDB field name
+	allowedSorts := map[string]string{
+		"rating": "avg_rating",
+	}
+	sortField := allowedSorts[sortBy]
+
+	// Set sort-order based on the input
+	sortOrder := -1
+	if order == "asc" {
+		sortOrder = 1
+	}
+
+	sort := Sort{
+		Field: sortField,
+		Order: sortOrder,
+	}
+
 	// Create a context that:
 	// 1. Automatically cancels after 3 seconds
 	// 2. Signals MongoDB to stop work
@@ -87,7 +108,7 @@ func (h *Handler) List(c *gin.Context) {
 	defer cancel()
 
 	// The handler calls the service to fetch list of restaurants
-	restaurants, err := h.service.List(ctx, int64(limit), int64(offset), filter)
+	restaurants, err := h.service.List(ctx, int64(limit), int64(offset), filter, sort)
 	if err != nil {
 		h.internalError(c, err)
 		return

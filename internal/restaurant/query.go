@@ -5,6 +5,11 @@ type Filter struct {
 	MinRating *float64
 }
 
+type Sort struct {
+	Field string
+	Order int
+}
+
 // NOTE:
 // We use pointers because we need to distinguish three states, not two.
 // For veg, those states are:
