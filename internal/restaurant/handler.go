@@ -81,7 +81,8 @@ func (h *Handler) List(c *gin.Context) {
 
 	// Convert client-facing sort parameter into a safe MongoDB field name
 	allowedSorts := map[string]string{
-		"rating": "avg_rating",
+		"rating":   "avg_rating",
+		"delivery": "sla.delivery_time",
 	}
 	sortField := allowedSorts[sortBy]
 
