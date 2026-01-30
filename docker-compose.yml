@@ -1,0 +1,33 @@
+# This file tells Docker Compose:
+# Build an API container from the local Dockerfile, name it ginger-root-api, 
+# expose port 8080 to my machine, and load environment variables from .env
+
+# This specifies the Docker Compose file format version
+# It tells Docker how to interpret the rest of the file
+version: "3.9"
+
+# This section defines the containers (services) that Docker Compose will manage
+services:
+
+  # This is the name of the service, we can name it anything (api, backend, web, etc.)
+  # Docker Compose will refer to this service by this name
+  api:
+
+    # This tells Docker to build an image from a Dockerfile:
+    # "." means “use the Dockerfile in the current directory
+    # Docker will look for a file named Dockerfile and build the image from it.
+    build: .
+
+    # This sets a custom name for the running container.
+    # Without this, Docker would auto-generate a name like project_api_1
+    # With this, the container will always be called - ginger-root-api
+    container_name: ginger-root-api
+
+    # This exposes ports between your host machine and the container, so this means:
+    # Port 8080 on our machine is mapped to port 8080 inside the container
+    ports:
+      - "8080:8080"
+
+    # This loads environment variables from a file called .env.
+    env_file:
+      - .env
