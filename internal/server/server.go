@@ -12,6 +12,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/viveksingh-01/ginger-root/internal/config"
+	"github.com/viveksingh-01/ginger-root/internal/health"
 	"github.com/viveksingh-01/ginger-root/internal/restaurant"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -34,6 +35,10 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 
 	// Use request-logger
 	r.Use(RequestLogger())
+
+	// Add health-check handler
+	healthHandler := health.NewHandler()
+	r.GET("/health", healthHandler.Check)
 
 	// Create route group
 	apiPath := r.Group("/api/v1")
