@@ -32,9 +32,15 @@ func NewHandler(s *Service) *Handler {
 
 // This method is an HTTP endpoint (registered to a route)
 func (h *Handler) List(c *gin.Context) {
-	// Read limit and offset query params from the request
+	// Read page and limit query params from the request
+	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "10")
-	offsetStr := c.DefaultQuery("offset", "0")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		h.badRequest(c, "INVALID_PAGE_VALUE", "page must be greater than 0")
+		return
+	}
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit <= 0 || limit > 100 {
@@ -42,11 +48,7 @@ func (h *Handler) List(c *gin.Context) {
 		return
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
-		h.badRequest(c, "INVALID_OFFSET", "offset must be >= 0")
-		return
-	}
+	skip := (page - 1) * limit
 
 	// Filter veg-only restaurants
 	var veg *bool
@@ -109,7 +111,7 @@ func (h *Handler) List(c *gin.Context) {
 	defer cancel()
 
 	// The handler calls the service to fetch list of restaurants
-	restaurants, err := h.service.List(ctx, int64(limit), int64(offset), filter, sort)
+	restaurants, err := h.service.List(ctx, int64(skip), int64(limit), filter, sort)
 	if err != nil {
 		h.internalError(c, err)
 		return
@@ -121,10 +123,10 @@ func (h *Handler) List(c *gin.Context) {
 	// * Sets Content-Type: application/json
 	// * Marshals Go structs into JSON
 	c.JSON(http.StatusOK, gin.H{
-		"count":  len(restaurants),
-		"data":   restaurants,
-		"limit":  limit,
-		"offset": offset,
+		"count": len(restaurants),
+		"data":  restaurants,
+		"page":  page,
+		"limit": limit,
 	})
 }
 

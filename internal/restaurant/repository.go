@@ -25,13 +25,13 @@ func NewRepository(db *mongo.Database) *Repository {
 	return &Repository{collection: db.Collection("restaurants")}
 }
 
-func (r *Repository) List(ctx context.Context, limit, offset int64, f Filter, sort Sort) ([]Restaurant, error) {
+func (r *Repository) List(ctx context.Context, skip, limit int64, f Filter, sort Sort) ([]Restaurant, error) {
 	// Creates MongoDB query options. (Think of it like: “Extra instructions for MongoDB”)
 	opts := options.Find()
 	// Limits how many documents MongoDB returns
 	opts.SetLimit(limit)
 	// Skips offset number of documents
-	opts.SetSkip(offset)
+	opts.SetSkip(skip)
 	// Set sorting
 	opts.SetSort(bson.D{{Key: sort.Field, Value: sort.Order}})
 
