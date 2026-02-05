@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/viveksingh-01/ginger-root/internal/config"
 	"github.com/viveksingh-01/ginger-root/internal/health"
+	"github.com/viveksingh-01/ginger-root/internal/menu"
 	"github.com/viveksingh-01/ginger-root/internal/restaurant"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -49,6 +50,12 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 	restaurantHandler := restaurant.NewHandler(restaurantService)
 	// Register route for restaurant-handler
 	restaurant.RegisterRoutes(apiPath, restaurantHandler)
+
+	// Integrate menu's repository, service and handler and register route
+	menuRepo := menu.NewRepository(db)
+	menuService := menu.NewService(menuRepo)
+	menuHandler := menu.NewHandler(menuService)
+	menu.RegisterRoutes(apiPath, menuHandler)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
