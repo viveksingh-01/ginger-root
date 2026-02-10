@@ -41,3 +41,7 @@ func (s *Service) List(ctx context.Context, skip, limit int64, filter Filter, so
 	}
 	return s.repository.List(ctx, skip, limit, filter, sort)
 }
+
+func (s *Service) GetRestaurant(ctx context.Context, restaurantId string) (*Restaurant, error) {
+	return s.repository.FindByID(ctx, restaurantId)
+}
