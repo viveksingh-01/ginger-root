@@ -130,6 +130,16 @@ func (h *Handler) List(c *gin.Context) {
 	})
 }
 
+func (h *Handler) GetRestaurant(c *gin.Context) {
+	restaurantID := c.Param("restaurantId")
+	restaurant, err := h.service.GetRestaurant(c.Request.Context(), restaurantID)
+	if err != nil {
+		h.internalError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, restaurant)
+}
+
 // IMPORTANT:
 
 // Context timeouts — WHY THIS IS CRITICAL
