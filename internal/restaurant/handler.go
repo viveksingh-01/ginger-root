@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 // This code:
@@ -136,6 +137,11 @@ func (h *Handler) GetRestaurant(c *gin.Context) {
 	if err != nil {
 		h.internalError(c, err)
 		return
+	}
+	if err == mongo.ErrNoDocuments {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Restaurant not found",
+		})
 	}
 	c.JSON(http.StatusOK, restaurant)
 }
