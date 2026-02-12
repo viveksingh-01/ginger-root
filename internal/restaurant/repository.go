@@ -76,7 +76,11 @@ func (r *Repository) List(ctx context.Context, skip, limit int64, f Filter, sort
 
 func (r *Repository) FindByID(ctx context.Context, restaurantId string) (*Restaurant, error) {
 	var restaurant Restaurant
-	err := r.collection.FindOne(ctx, bson.M{"id": restaurantId}).Decode(&restaurant)
+	objID, err := bson.ObjectIDFromHex(restaurantId)
+	if err != nil {
+		return nil, err // invalid ObjectID string
+	}
+	err = r.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&restaurant)
 	if err != nil {
 		return nil, err
 	}
