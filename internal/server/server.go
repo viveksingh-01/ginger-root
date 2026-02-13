@@ -15,6 +15,7 @@ import (
 	"github.com/viveksingh-01/ginger-root/internal/health"
 	"github.com/viveksingh-01/ginger-root/internal/menu"
 	"github.com/viveksingh-01/ginger-root/internal/restaurant"
+	"github.com/viveksingh-01/ginger-root/internal/restaurantmenu"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -56,6 +57,10 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 	menuService := menu.NewService(menuRepo)
 	menuHandler := menu.NewHandler(menuService)
 	menu.RegisterRoutes(apiPath, menuHandler)
+
+	restaurantMenuService := restaurantmenu.NewService(restaurantService, menuService)
+	restaurantMenuHandler := restaurantmenu.NewHandler(restaurantMenuService)
+	restaurantmenu.RegisterRoutes(apiPath, restaurantMenuHandler)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
