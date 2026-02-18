@@ -18,7 +18,7 @@ func NewHandler(s *Service) *Handler {
 
 func (h *Handler) GetRestaurantMenu(c *gin.Context) {
 	restaurantID := c.Param("restaurantId")
-	r, err := h.service.GetRestaurantMenu(c, restaurantID)
+	r, err := h.service.GetRestaurantMenu(c.Request.Context(), restaurantID)
 	if err != nil {
 		if errors.Is(err, restaurant.ErrRestaurantNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
