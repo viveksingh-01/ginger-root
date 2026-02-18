@@ -82,6 +82,9 @@ func (r *Repository) FindByID(ctx context.Context, restaurantId string) (*Restau
 	}
 	err = r.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&restaurant)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrRestaurantNotFound
+		}
 		return nil, err
 	}
 	return &restaurant, nil

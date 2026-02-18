@@ -1,12 +1,15 @@
 package restaurant
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/viveksingh-01/ginger-root/internal/httpx"
 )
+
+var ErrRestaurantNotFound = errors.New("restaurant not found")
 
 func (h *Handler) badRequest(c *gin.Context, code, message string) {
 	h.respondError(c, http.StatusBadRequest, code, message)
