@@ -2,6 +2,7 @@ package restaurantmenu
 
 import (
 	"context"
+	"errors"
 
 	"github.com/viveksingh-01/ginger-root/internal/menu"
 	"github.com/viveksingh-01/ginger-root/internal/restaurant"
@@ -24,12 +25,20 @@ func (s *Service) GetRestaurantMenu(ctx context.Context, restaurantId string) (*
 	if err != nil {
 		return nil, err
 	}
-	menu, err := s.menuService.GetMenu(ctx, restaurantId)
+
+	m, err := s.menuService.GetMenu(ctx, restaurantId)
 	if err != nil {
+		if errors.Is(err, menu.ErrMenuNotFound) {
+			return &RestaurantMenuResponse{
+				Details: restaurant,
+				Menu:    []menu.MenuItem{},
+			}, nil
+		}
 		return nil, err
 	}
+
 	return &RestaurantMenuResponse{
 		Details: restaurant,
-		Menu:    menu.Items,
+		Menu:    m.Items,
 	}, nil
 }
