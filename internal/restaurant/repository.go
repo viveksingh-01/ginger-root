@@ -89,3 +89,20 @@ func (r *Repository) FindByID(ctx context.Context, restaurantId string) (*Restau
 	}
 	return &restaurant, nil
 }
+
+func (r *Repository) Search(ctx context.Context, query string) ([]Restaurant, error) {
+	filter := bson.M{
+		"name": bson.M{"$regex": query},
+	}
+
+	cursor, err := r.collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var restaurants []Restaurant
+	if err = cursor.All(ctx, &restaurants); err != nil {
+		return nil, err
+	}
+	return restaurants, nil
+}
