@@ -146,6 +146,23 @@ func (h *Handler) GetRestaurant(c *gin.Context) {
 	c.JSON(http.StatusOK, restaurant)
 }
 
+// Search functionality
+func (h *Handler) Search(c *gin.Context) {
+	query := c.Query("q")
+	if query == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "search parameter is required"})
+		return
+	}
+
+	restaurants, err := h.service.Search(c.Request.Context(), query)
+	if err != nil {
+		h.internalError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, restaurants)
+}
+
 // IMPORTANT:
 
 // Context timeouts — WHY THIS IS CRITICAL
