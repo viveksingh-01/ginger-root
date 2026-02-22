@@ -92,7 +92,7 @@ func (r *Repository) FindByID(ctx context.Context, restaurantId string) (*Restau
 
 func (r *Repository) Search(ctx context.Context, query string) ([]Restaurant, error) {
 	filter := bson.M{
-		"name": bson.M{"$regex": query},
+		"name": bson.M{"$regex": query, "$options": "i"},
 	}
 
 	cursor, err := r.collection.Find(ctx, filter)
