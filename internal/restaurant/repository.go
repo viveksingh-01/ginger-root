@@ -100,7 +100,7 @@ func (r *Repository) Search(ctx context.Context, query string) ([]Restaurant, er
 		return nil, err
 	}
 
-	var restaurants []Restaurant
+	restaurants := []Restaurant{}
 	if err = cursor.All(ctx, &restaurants); err != nil {
 		return nil, err
 	}
