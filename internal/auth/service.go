@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type Service struct {
@@ -40,4 +41,25 @@ func (s *Service) Signup(ctx context.Context, req *SignupRequest) (*User, error)
 	}
 
 	return user, nil
+}
+
+func (s *Service) Login(ctx context.Context, req *LoginRequest) (*User, string, error) {
+	user, err := s.repository.FindByEmail(ctx, req.Email)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, "", errors.New("invalid credentials")
+		}
+		return nil, "", err
+	}
+
+	if !CheckPassword(req.Password, user.Password) {
+		return nil, "", errors.New("invalid credentials")
+	}
+
+	token, err := GenerateToken(user.ID.Hex())
+	if err != nil {
+		return nil, "", err
+	}
+
+	return user, token, nil
 }
