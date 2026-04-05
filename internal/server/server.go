@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/viveksingh-01/ginger-root/internal/auth"
 	"github.com/viveksingh-01/ginger-root/internal/config"
 	"github.com/viveksingh-01/ginger-root/internal/health"
 	"github.com/viveksingh-01/ginger-root/internal/menu"
@@ -44,6 +45,12 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 
 	// Create route group
 	apiPath := r.Group("/api/v1")
+
+	// Integrate user-auth repository, service and handler
+	authRepo := auth.NewRepository(db)
+	authService := auth.NewService(authRepo)
+	authHandler := auth.NewHandler(authService)
+	auth.RegisterRoutes(apiPath, authHandler)
 
 	// Integrate restaurant's repository, service and handler
 	restaurantRepo := restaurant.NewRepository(db)
