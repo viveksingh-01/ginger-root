@@ -2,10 +2,13 @@ package server
 
 import (
 	"log"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/viveksingh-01/ginger-root/internal/auth"
 )
 
 func RequestLogger() gin.HandlerFunc {
@@ -29,5 +32,53 @@ func RequestLogger() gin.HandlerFunc {
 			latency,
 			requestID,
 		)
+	}
+}
+
+const ContextUserID = "userId"
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		// Get Authorization header
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"statusCode":    1,
+				"statusMessage": "Authorization header missing",
+			})
+			c.Abort()
+			return
+		}
+
+		// Validate format: Bearer <token>
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"statusCode":    1,
+				"statusMessage": "Authorization header missing",
+			})
+			c.Abort()
+			return
+		}
+
+		tokenString := parts[1]
+
+		// Validate token
+		claims, err := auth.ValidateToken(tokenString)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"statusCode":    1,
+				"statusMessage": "Invalid or expired token",
+			})
+			c.Abort()
+			return
+		}
+
+		// Inject userId into context
+		c.Set(ContextUserID, claims.UserID)
+
+		// Continue request
+		c.Next()
 	}
 }
