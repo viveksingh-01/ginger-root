@@ -25,10 +25,10 @@ func (r *Repository) Create(ctx context.Context, user *User) error {
 	return err
 }
 
-// Retrieve User by EmailID
-func (r *Repository) FindByEmail(ctx context.Context, email string) (*User, error) {
+// Retrieve User by Phone number
+func (r *Repository) FindByPhone(ctx context.Context, phone string) (*User, error) {
 	var user *User
-	err := r.collection.FindOne(ctx, bson.M{"email": email}).Decode((&user))
+	err := r.collection.FindOne(ctx, bson.M{"phone": phone}).Decode((&user))
 	if err != nil {
 		return nil, err
 	}

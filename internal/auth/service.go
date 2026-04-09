@@ -17,9 +17,9 @@ func NewService(repo *Repository) *Service {
 }
 
 func (s *Service) Signup(ctx context.Context, req *SignupRequest) (*User, error) {
-	existing, _ := s.repository.FindByEmail(ctx, req.Email)
+	existing, _ := s.repository.FindByPhone(ctx, req.Phone)
 	if existing != nil {
-		return nil, errors.New("email already exists")
+		return nil, errors.New("already registered")
 	}
 
 	hashedPassword, err := HashPassword(req.Password)
@@ -44,7 +44,7 @@ func (s *Service) Signup(ctx context.Context, req *SignupRequest) (*User, error)
 }
 
 func (s *Service) Login(ctx context.Context, req *LoginRequest) (*User, string, error) {
-	user, err := s.repository.FindByEmail(ctx, req.Email)
+	user, err := s.repository.FindByPhone(ctx, req.Phone)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, "", errors.New("invalid credentials")
