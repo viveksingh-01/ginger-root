@@ -70,11 +70,14 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 	restaurantMenuHandler := restaurantmenu.NewHandler(restaurantMenuService)
 	restaurantmenu.RegisterRoutes(apiPath, restaurantMenuHandler)
 
-	// Register Address route
-	addressRepo := address.NewRepository(db)
-	addressService := address.NewService(addressRepo)
-	addressHandler := address.NewHandler(addressService)
-	address.RegisterRoutes(apiPath, addressHandler)
+	apiPath.Use(AuthMiddleware())
+	{
+		// Register Address route
+		addressRepo := address.NewRepository(db)
+		addressService := address.NewService(addressRepo)
+		addressHandler := address.NewHandler(addressService)
+		address.RegisterRoutes(apiPath, addressHandler)
+	}
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
