@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/viveksingh-01/ginger-root/internal/address"
 	"github.com/viveksingh-01/ginger-root/internal/auth"
 	"github.com/viveksingh-01/ginger-root/internal/config"
 	"github.com/viveksingh-01/ginger-root/internal/health"
@@ -68,6 +69,12 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 	restaurantMenuService := restaurantmenu.NewService(restaurantService, menuService)
 	restaurantMenuHandler := restaurantmenu.NewHandler(restaurantMenuService)
 	restaurantmenu.RegisterRoutes(apiPath, restaurantMenuHandler)
+
+	// Register Address route
+	addressRepo := address.NewRepository(db)
+	addressService := address.NewService(addressRepo)
+	addressHandler := address.NewHandler(addressService)
+	address.RegisterRoutes(apiPath, addressHandler)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
