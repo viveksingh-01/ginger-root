@@ -6,9 +6,9 @@ type CreateAddressRequest struct {
 	Annotation string  `json:"annotation" binding:"required"`
 	Address    string  `json:"address" binding:"required"`
 	House      string  `json:"house" binding:"required"`
-	Area       string  `json:"area" binding:"required"`
-	City       string  `json:"city" binding:"required"`
-	Landmark   string  `json:"landmark,omitempty"`
+	Area       string  `json:"area,omitempty"`
+	City       string  `json:"city,omitempty"`
+	Landmark   string  `json:"landmark" binding:"required"`
 	Lat        float64 `json:"lat" binding:"required"`
 	Lng        float64 `json:"lng" binding:"required"`
 }

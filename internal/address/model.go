@@ -12,9 +12,9 @@ type Address struct {
 	Annotation string        `bson:"annotation"`
 	Address    string        `bson:"address"`
 	House      string        `bson:"house"`
-	Area       string        `bson:"area"`
-	City       string        `bson:"city"`
-	Landmark   string        `bson:"landmark,omitempty"`
+	Area       string        `bson:"area,omitempty"`
+	City       string        `bson:"city,omitempty"`
+	Landmark   string        `bson:"landmark"`
 	Lat        float64       `bson:"lat"`
 	Lng        float64       `bson:"lng"`
 	IsDefault  bool          `bson:"isDefault"`
