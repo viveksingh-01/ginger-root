@@ -72,6 +72,7 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 
 	apiPath.Use(AuthMiddleware())
 	{
+		auth.RegisterMeHandler(apiPath, authHandler)
 		// Register Address route
 		addressRepo := address.NewRepository(db)
 		addressService := address.NewService(addressRepo)
