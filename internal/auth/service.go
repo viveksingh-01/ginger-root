@@ -63,3 +63,12 @@ func (s *Service) Login(ctx context.Context, req *LoginRequest) (*User, string, 
 
 	return user, token, nil
 }
+
+func (s *Service) GetUser(ctx context.Context, userID string) (*User, error) {
+	oid, err := bson.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.repository.FindByID(ctx, oid)
+}

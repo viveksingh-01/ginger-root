@@ -72,3 +72,33 @@ func (h *Handler) Login(c *gin.Context) {
 		},
 	})
 }
+
+func (h *Handler) GetUser(c *gin.Context) {
+	userIDVal, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, Response{
+			StatusCode:    1,
+			StatusMessage: "unauthorized",
+		})
+		return
+	}
+
+	userID := userIDVal.(string)
+
+	user, err := h.service.GetUser(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Response{
+			StatusCode:    1,
+			StatusMessage: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, Response{
+		StatusCode:    0,
+		StatusMessage: "fetched successfully",
+		Data: &AuthResponse{
+			User: ToUserResponse(user),
+		},
+	})
+}

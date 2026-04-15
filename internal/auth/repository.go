@@ -34,3 +34,12 @@ func (r *Repository) FindByPhone(ctx context.Context, phone string) (*User, erro
 	}
 	return user, nil
 }
+
+func (r *Repository) FindByID(ctx context.Context, id bson.ObjectID) (*User, error) {
+	var user User
+	err := r.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
