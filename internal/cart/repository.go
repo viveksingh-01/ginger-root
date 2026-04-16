@@ -15,9 +15,17 @@ func NewRepository(db *mongo.Database) *Repository {
 	return &Repository{collection: db.Collection("cart")}
 }
 
-func (r *Repository) FindByUserID(ctx context.Context, userID string) (*Cart, error) {
+func (r *Repository) FindCart(ctx context.Context, userID, guestID string) (*Cart, error) {
+	filter := bson.M{}
+
+	if userID != "" {
+		filter["userId"] = userID
+	} else {
+		filter["guestId"] = guestID
+	}
+
 	var cart Cart
-	err := r.collection.FindOne(ctx, bson.M{"userId": userID}).Decode(&cart)
+	err := r.collection.FindOne(ctx, filter).Decode(&cart)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, ErrCartNotFound
@@ -28,9 +36,16 @@ func (r *Repository) FindByUserID(ctx context.Context, userID string) (*Cart, er
 }
 
 func (r *Repository) Upsert(ctx context.Context, cart *Cart) error {
+	filter := bson.M{}
+	if cart.UserID != "" {
+		filter["userId"] = cart.UserID
+	} else {
+		filter["guestId"] = cart.GuestID
+	}
+
 	_, err := r.collection.UpdateOne(
 		ctx,
-		bson.M{"userId": cart.UserID},
+		filter,
 		bson.M{"$set": cart},
 	)
 	return err
