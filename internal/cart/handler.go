@@ -25,20 +25,22 @@ func (h *Handler) AddToCart(c *gin.Context) {
 		return
 	}
 
-	userIDVal, exists := c.Get("userId")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, Response{
-			StatusCode:    1,
-			StatusMessage: "unauthorized",
-		})
-		return
-	}
+	var userID, guestID string
 
-	userID := userIDVal.(string)
+	if val, exists := c.Get("userId"); exists {
+		userID = val.(string)
+	} else {
+		guestID = c.GetHeader("X-Guest-Id")
+		if guestID == "" {
+			guestID = generateGuestID()
+			c.Header("X-Guest-Id", guestID)
+		}
+	}
 
 	resp, err := h.service.AddToCart(
 		c.Request.Context(),
 		userID,
+		guestID,
 		req.Cart.RestaurantID,
 		req.Cart.AddressID,
 		req.Cart.CartItems,
