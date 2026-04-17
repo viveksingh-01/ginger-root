@@ -141,3 +141,123 @@ func (s *Service) AddToCart(
 		},
 	}, nil
 }
+
+func (s *Service) GetCart(
+	ctx context.Context,
+	userID, guestID string,
+) (*Response, error) {
+
+	cart, err := s.repo.FindCart(ctx, userID, guestID)
+	if err != nil {
+		if err == ErrCartNotFound {
+			return s.emptyCartResponse(), nil
+		}
+		return nil, err
+	}
+
+	return s.buildCartResponse(ctx, cart)
+}
+
+func (s *Service) emptyCartResponse() *Response {
+	return &Response{
+		StatusCode:    0,
+		StatusMessage: "SUCCESS",
+		Data: &CartResponse{
+			CartMeta: CartMeta{},
+			CartDetails: CartDetails{
+				Items:           []Item{},
+				TotalItemsCount: 0,
+				BillDetails:     BillDetails{},
+			},
+		},
+	}
+}
+
+func (s *Service) buildCartResponse(
+	ctx context.Context,
+	cart *Cart,
+) (*Response, error) {
+
+	var (
+		u     *auth.User
+		err   error
+		email string
+		phone string
+	)
+
+	if cart.UserID != "" {
+		u, err = s.userService.GetUser(ctx, cart.UserID)
+		if err != nil {
+			return nil, err
+		}
+		email = u.Email
+		phone = u.Phone
+	}
+
+	restaurant, _ := s.restaurantService.GetRestaurant(ctx, cart.RestaurantID)
+	menuData, _ := s.menuService.GetMenu(ctx, cart.RestaurantID)
+
+	var responseItems []Item
+	totalItems := 0
+	subtotal := 0.0
+
+	for _, ci := range cart.Items {
+		mi := FindMenuItem(menuData.Items, ci.MenuItemID)
+		if mi == nil {
+			continue
+		}
+
+		itemSubtotal := float64(mi.Price * ci.Quantity)
+
+		responseItems = append(responseItems, Item{
+			MenuItemID:        ci.MenuItemID,
+			Name:              mi.Name,
+			Quantity:          ci.Quantity,
+			Total:             int(itemSubtotal),
+			FinalPrice:        int(mi.FinalPrice),
+			IsVeg:             BoolToInt(mi.IsVeg),
+			CloudinaryImageID: mi.ImageID,
+		})
+
+		totalItems += ci.Quantity
+		subtotal += itemSubtotal
+	}
+
+	delivery := 49.0
+	discount := 20.0
+	gst := subtotal * 0.05
+	finalAmount := subtotal + delivery + gst - discount
+
+	return &Response{
+		StatusCode:    0,
+		StatusMessage: "SUCCESS",
+		Data: &CartResponse{
+			CartMeta: CartMeta{
+				CartID:     cart.ID.Hex(),
+				EmailID:    email,
+				PhoneNo:    phone,
+				CodEnabled: true,
+				AddressID:  cart.AddressID,
+				RestaurantDetails: RestaurantDetails{
+					ID:                restaurant.ID.Hex(),
+					Name:              restaurant.Name,
+					CloudinaryImageID: restaurant.CloudinaryImageID,
+					SLA: SLA{
+						SLAString: restaurant.SLA.SLAString,
+					},
+				},
+			},
+			CartDetails: CartDetails{
+				Items:           responseItems,
+				TotalItemsCount: totalItems,
+				BillDetails: BillDetails{
+					Subtotal:       subtotal,
+					DeliveryCharge: delivery,
+					DiscountAmount: discount,
+					GST:            gst,
+					FinalAmount:    finalAmount,
+				},
+			},
+		},
+	}, nil
+}
