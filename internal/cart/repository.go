@@ -5,6 +5,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type Repository struct {
@@ -12,7 +13,7 @@ type Repository struct {
 }
 
 func NewRepository(db *mongo.Database) *Repository {
-	return &Repository{collection: db.Collection("cart")}
+	return &Repository{collection: db.Collection("carts")}
 }
 
 func (r *Repository) FindCart(ctx context.Context, userID, guestID string) (*Cart, error) {
@@ -43,10 +44,23 @@ func (r *Repository) Upsert(ctx context.Context, cart *Cart) error {
 		filter["guestId"] = cart.GuestID
 	}
 
+	update := bson.M{
+		"$set": bson.M{
+			"userId":    cart.UserID,
+			"guestId":   cart.GuestID,
+			"items":     cart.Items,
+			"updatedAt": cart.UpdatedAt,
+		},
+		"$setOnInsert": bson.M{
+			"createdAt": cart.CreatedAt,
+		},
+	}
+
 	_, err := r.collection.UpdateOne(
 		ctx,
 		filter,
-		bson.M{"$set": cart},
+		update,
+		options.UpdateOne().SetUpsert(true),
 	)
 	return err
 }
