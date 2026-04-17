@@ -26,18 +26,21 @@ func NewService(r *Repository, m *menu.Service, rs *restaurant.Service, us *auth
 
 func (s *Service) AddToCart(
 	ctx context.Context,
-	userID string,
-	restaurantID string,
-	addressID string,
+	userID, guestID, restaurantID, addressID string,
 	items []CartItem,
 ) (*Response, error) {
 
-	u, err := s.userService.GetUser(ctx, userID)
-	if err != nil {
-		return nil, err
+	var u *auth.User
+	var err error
+
+	if userID != "" {
+		u, err = s.userService.GetUser(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	cart, err := s.repo.FindByUserID(ctx, userID)
+	cart, err := s.repo.FindCart(ctx, userID, guestID)
 	if err != nil && err != ErrCartNotFound {
 		return nil, err
 	}
@@ -45,6 +48,7 @@ func (s *Service) AddToCart(
 	if err == ErrCartNotFound {
 		cart = &Cart{
 			UserID:       userID,
+			GuestID:      guestID,
 			RestaurantID: restaurantID,
 			AddressID:    addressID,
 			Items:        items,
@@ -98,14 +102,20 @@ func (s *Service) AddToCart(
 	gst := subtotal * 0.05
 	finalAmount := subtotal + delivery + gst - discount
 
+	email, phone := "", ""
+	if u != nil {
+		email = u.Email
+		phone = u.Phone
+	}
+
 	return &Response{
 		StatusCode:    0,
 		StatusMessage: "CART_UPDATED_SUCCESSFULLY",
 		Data: &CartResponse{
 			CartMeta: CartMeta{
-				CartID:     cart.ID,
-				EmailID:    u.Email,
-				PhoneNo:    u.Phone,
+				CartID:     cart.ID.Hex(),
+				EmailID:    email,
+				PhoneNo:    phone,
 				CodEnabled: true,
 				AddressID:  addressID,
 				RestaurantDetails: RestaurantDetails{
