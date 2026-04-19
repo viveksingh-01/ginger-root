@@ -46,10 +46,11 @@ func (r *Repository) Upsert(ctx context.Context, cart *Cart) error {
 
 	update := bson.M{
 		"$set": bson.M{
-			"userId":    cart.UserID,
-			"guestId":   cart.GuestID,
-			"items":     cart.Items,
-			"updatedAt": cart.UpdatedAt,
+			"userId":       cart.UserID,
+			"guestId":      cart.GuestID,
+			"restaurantId": cart.RestaurantID,
+			"cartItems":    cart.Items,
+			"updatedAt":    cart.UpdatedAt,
 		},
 		"$setOnInsert": bson.M{
 			"createdAt": cart.CreatedAt,
