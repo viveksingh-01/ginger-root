@@ -19,22 +19,29 @@ func FindMenuItem(items []menu.MenuItem, id string) *menu.MenuItem {
 }
 
 func MergeItems(existing, incoming []CartItem) []CartItem {
-	m := make(map[string]int)
+	itemMap := make(map[string]CartItem)
 
-	for _, i := range existing {
-		m[i.MenuItemID] += i.Quantity
-	}
-	for _, i := range incoming {
-		m[i.MenuItemID] += i.Quantity
+	// existing items
+	for _, item := range existing {
+		itemMap[item.MenuItemID] = item
 	}
 
-	var result []CartItem
-	for id, qty := range m {
-		result = append(result, CartItem{
-			MenuItemID: id,
-			Quantity:   qty,
-		})
+	// incoming items
+	for _, item := range incoming {
+		if ex, ok := itemMap[item.MenuItemID]; ok {
+			ex.Quantity = item.Quantity
+			itemMap[item.MenuItemID] = ex
+		} else {
+			itemMap[item.MenuItemID] = item
+		}
 	}
+
+	// convert back to slice
+	result := make([]CartItem, 0, len(itemMap))
+	for _, v := range itemMap {
+		result = append(result, v)
+	}
+
 	return result
 }
 
