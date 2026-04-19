@@ -2,6 +2,7 @@ package cart
 
 import (
 	"context"
+	"encoding/hex"
 
 	"github.com/viveksingh-01/ginger-root/internal/auth"
 	"github.com/viveksingh-01/ginger-root/internal/menu"
@@ -66,8 +67,15 @@ func (s *Service) AddToCart(
 		return nil, err
 	}
 
-	restaurant, _ := s.restaurantService.GetRestaurant(ctx, restaurantID)
-	menuData, _ := s.menuService.GetMenu(ctx, restaurantID)
+	r, err := s.restaurantService.GetRestaurant(ctx, restaurantID)
+	if err != nil {
+		return nil, err
+	}
+
+	menuData, err := s.menuService.GetMenu(ctx, restaurantID)
+	if err != nil || menuData == nil {
+		menuData = &menu.Menu{RestaurantID: restaurantID, Items: []menu.MenuItem{}}
+	}
 
 	var responseItems []Item
 	totalItems := 0
@@ -119,11 +127,11 @@ func (s *Service) AddToCart(
 				CodEnabled: true,
 				AddressID:  addressID,
 				RestaurantDetails: RestaurantDetails{
-					ID:                restaurant.ID.Hex(),
-					Name:              restaurant.Name,
-					CloudinaryImageID: restaurant.CloudinaryImageID,
+					ID:                r.ID.Hex(),
+					Name:              r.Name,
+					CloudinaryImageID: r.CloudinaryImageID,
 					SLA: SLA{
-						SLAString: restaurant.SLA.SLAString,
+						SLAString: r.SLA.SLAString,
 					},
 				},
 			},
@@ -177,6 +185,9 @@ func (s *Service) buildCartResponse(
 	ctx context.Context,
 	cart *Cart,
 ) (*Response, error) {
+	if !isValidObjectIDHex(cart.RestaurantID) {
+		return s.emptyCartResponse(), nil
+	}
 
 	var (
 		u     *auth.User
@@ -194,12 +205,23 @@ func (s *Service) buildCartResponse(
 		phone = u.Phone
 	}
 
-	restaurant, _ := s.restaurantService.GetRestaurant(ctx, cart.RestaurantID)
-	menuData, _ := s.menuService.GetMenu(ctx, cart.RestaurantID)
+	r, err := s.restaurantService.GetRestaurant(ctx, cart.RestaurantID)
+	if err != nil {
+		if err == restaurant.ErrRestaurantNotFound {
+			return s.emptyCartResponse(), nil
+		}
+		return nil, err
+	}
 
-	var responseItems []Item
+	menuData, err := s.menuService.GetMenu(ctx, cart.RestaurantID)
+	if err != nil || menuData == nil {
+		menuData = &menu.Menu{RestaurantID: cart.RestaurantID, Items: []menu.MenuItem{}}
+	}
+
+	responseItems := []Item{}
 	totalItems := 0
 	subtotal := 0.0
+	discount := 0.0
 
 	for _, ci := range cart.Items {
 		mi := FindMenuItem(menuData.Items, ci.MenuItemID)
@@ -207,24 +229,25 @@ func (s *Service) buildCartResponse(
 			continue
 		}
 
-		itemSubtotal := float64(mi.Price * ci.Quantity)
+		itemTotal := float64(mi.Price * ci.Quantity)
+		finalPrice := float64(mi.FinalPrice * ci.Quantity)
 
 		responseItems = append(responseItems, Item{
 			MenuItemID:        ci.MenuItemID,
 			Name:              mi.Name,
 			Quantity:          ci.Quantity,
-			Total:             int(itemSubtotal),
-			FinalPrice:        int(mi.FinalPrice),
+			Total:             int(itemTotal),
+			FinalPrice:        int(finalPrice),
 			IsVeg:             BoolToInt(mi.IsVeg),
 			CloudinaryImageID: mi.ImageID,
 		})
 
 		totalItems += ci.Quantity
-		subtotal += itemSubtotal
+		subtotal += itemTotal
+		discount += (itemTotal - finalPrice)
 	}
 
-	delivery := 49.0
-	discount := 20.0
+	delivery := 4900.0
 	gst := subtotal * 0.05
 	finalAmount := subtotal + delivery + gst - discount
 
@@ -239,11 +262,11 @@ func (s *Service) buildCartResponse(
 				CodEnabled: true,
 				AddressID:  cart.AddressID,
 				RestaurantDetails: RestaurantDetails{
-					ID:                restaurant.ID.Hex(),
-					Name:              restaurant.Name,
-					CloudinaryImageID: restaurant.CloudinaryImageID,
+					ID:                r.ID.Hex(),
+					Name:              r.Name,
+					CloudinaryImageID: r.CloudinaryImageID,
 					SLA: SLA{
-						SLAString: restaurant.SLA.SLAString,
+						SLAString: r.SLA.SLAString,
 					},
 				},
 			},
@@ -260,4 +283,12 @@ func (s *Service) buildCartResponse(
 			},
 		},
 	}, nil
+}
+
+func isValidObjectIDHex(s string) bool {
+	if len(s) != 24 {
+		return false
+	}
+	_, err := hex.DecodeString(s)
+	return err == nil
 }
