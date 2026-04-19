@@ -59,3 +59,43 @@ func (h *Handler) AddToCart(c *gin.Context) {
 		Data:          resp.Data,
 	})
 }
+
+func (h *Handler) GetCart(c *gin.Context) {
+	var userID, guestID string
+
+	if val, exists := c.Get("userId"); exists {
+		userID = val.(string)
+	} else {
+		guestID = c.GetHeader("X-Guest-Id")
+		if guestID == "" {
+			c.JSON(http.StatusOK, gin.H{
+				"statusCode":    0,
+				"statusMessage": "SUCCESS",
+				"data": gin.H{
+					"cartMeta":  gin.H{},
+					"cartItems": gin.H{"items": []any{}},
+				},
+			})
+			return
+		}
+	}
+
+	resp, err := h.service.GetCart(
+		c.Request.Context(),
+		userID,
+		guestID,
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Response{
+			StatusCode:    1,
+			StatusMessage: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, Response{
+		StatusCode:    0,
+		StatusMessage: "fetched successfully",
+		Data:          resp.Data,
+	})
+}
