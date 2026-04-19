@@ -25,12 +25,7 @@ func NewService(r *Repository, m *menu.Service, rs *restaurant.Service, us *auth
 	}
 }
 
-func (s *Service) AddToCart(
-	ctx context.Context,
-	userID, guestID, restaurantID, addressID string,
-	items []CartItem,
-) (*Response, error) {
-
+func (s *Service) AddToCart(ctx context.Context, userID, guestID, restaurantID, addressID string, items []CartItem) (*Response, error) {
 	var u *auth.User
 	var err error
 
@@ -181,10 +176,7 @@ func (s *Service) emptyCartResponse() *Response {
 	}
 }
 
-func (s *Service) buildCartResponse(
-	ctx context.Context,
-	cart *Cart,
-) (*Response, error) {
+func (s *Service) buildCartResponse(ctx context.Context, cart *Cart) (*Response, error) {
 	if !isValidObjectIDHex(cart.RestaurantID) {
 		return s.emptyCartResponse(), nil
 	}
