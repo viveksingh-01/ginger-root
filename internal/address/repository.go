@@ -2,6 +2,7 @@ package address
 
 import (
 	"context"
+	"errors"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -42,4 +43,20 @@ func (r *Repository) GetByUserID(ctx context.Context, userId bson.ObjectID) ([]*
 	}
 
 	return addresses, nil
+}
+
+var ErrAddressNotFound = errors.New("address not found")
+
+func (r *Repository) FindByID(ctx context.Context, addressID string) (*Address, error) {
+	var addr Address
+
+	err := r.collection.FindOne(ctx, bson.M{"id": addressID}).Decode(&addr)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrAddressNotFound
+		}
+		return nil, err
+	}
+
+	return &addr, nil
 }
