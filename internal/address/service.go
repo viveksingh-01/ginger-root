@@ -45,3 +45,11 @@ func (s *Service) GetAddresses(ctx context.Context, userId string) ([]*Address, 
 
 	return s.repo.GetByUserID(ctx, uid)
 }
+
+func (s *Service) GetAddress(ctx context.Context, addressID string) (*Address, error) {
+	addr, err := s.repo.FindByID(ctx, addressID)
+	if err != nil {
+		return nil, err
+	}
+	return addr, nil
+}
