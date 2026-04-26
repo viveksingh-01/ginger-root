@@ -1,0 +1,28 @@
+package order
+
+import "github.com/viveksingh-01/ginger-root/internal/address"
+
+type OrderRequest struct {
+	CartID        string `json:"cartId" binding:"required"`
+	AddressID     string `json:"addressId" binding:"required"`
+	PaymentMethod string `json:"paymentMethod" binding:"required"`
+}
+
+type OrderResponse struct {
+	ID             string                  `json:"id"`
+	RestaurantID   string                  `json:"restaurantId"`
+	RestaurantName string                  `json:"restaurantName"`
+	Address        address.AddressResponse `json:"address"`
+	Items          []OrderItem             `json:"items"`
+	BillDetails    BillDetails             `json:"billDetails"`
+	Status         string                  `json:"status"`
+	CreatedAt      int64                   `json:"createdAt"`
+}
+
+type BillDetails struct {
+	Subtotal       float64 `json:"subtotal"`
+	DeliveryCharge float64 `json:"deliveryCharge"`
+	GST            float64 `json:"gst"`
+	Discount       float64 `json:"discount"`
+	FinalAmount    float64 `json:"finalAmount"`
+}
