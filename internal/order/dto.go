@@ -16,7 +16,6 @@ type OrderResponse struct {
 	Items          []OrderItem             `json:"items"`
 	BillDetails    BillDetails             `json:"billDetails"`
 	Status         string                  `json:"status"`
-	CreatedAt      int64                   `json:"createdAt"`
 }
 
 type BillDetails struct {
