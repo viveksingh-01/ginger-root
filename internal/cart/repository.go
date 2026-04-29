@@ -65,3 +65,20 @@ func (r *Repository) Upsert(ctx context.Context, cart *Cart) error {
 	)
 	return err
 }
+
+func (r *Repository) FindCartByID(ctx context.Context, cartID string) (*Cart, error) {
+	objID, err := bson.ObjectIDFromHex(cartID)
+	if err != nil {
+		return nil, err
+	}
+
+	var cart Cart
+	err = r.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&cart)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrCartNotFound
+		}
+		return nil, err
+	}
+	return &cart, nil
+}
