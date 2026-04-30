@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ type Service struct {
 	cartRepo          *cart.Repository
 	menuService       *menu.Service
 	restaurantService *restaurant.Service
+	addressService    *address.Service
 }
 
 func NewService(
@@ -30,6 +32,7 @@ func NewService(
 		cartRepo:          cartRepo,
 		menuService:       m,
 		restaurantService: rs,
+		addressService:    as,
 	}
 }
 
@@ -52,6 +55,15 @@ func (s *Service) PlaceOrder(ctx context.Context, userID, cartID, addressID, pay
 		menuData = &menu.Menu{Items: []menu.MenuItem{}}
 	}
 
+	// Fetch address
+	address, err := s.addressService.GetAddress(ctx, addressID)
+	if err != nil {
+		return nil, err
+	}
+	if userID != "" && address.UserID.Hex() != userID {
+		return nil, errors.New("address does not belong to user")
+	}
+
 	// Create order
 	order := &Order{
 		ID:             uuid.NewString(),
@@ -59,6 +71,7 @@ func (s *Service) PlaceOrder(ctx context.Context, userID, cartID, addressID, pay
 		RestaurantID:   r.ID.Hex(),
 		RestaurantName: r.Name,
 		PaymentMethod:  paymentMethod,
+		Address:        *address,
 		Status:         "PLACED",
 		CreatedAt:      time.Now(),
 	}
