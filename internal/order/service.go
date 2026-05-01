@@ -64,14 +64,50 @@ func (s *Service) PlaceOrder(ctx context.Context, userID, cartID, addressID, pay
 		return nil, errors.New("address does not belong to user")
 	}
 
+	// Calculate totals
+	var items []OrderItem
+	subtotal := 0.0
+	discount := 0.0
+
+	for _, ci := range cartData.Items {
+		mi := cart.FindMenuItem(menuData.Items, ci.MenuItemID)
+		if mi == nil {
+			continue
+		}
+
+		itemTotal := float64(mi.Price * ci.Quantity)
+		finalPrice := float64(mi.FinalPrice * ci.Quantity)
+
+		items = append(items, OrderItem{
+			MenuItemID: ci.MenuItemID,
+			Name:       mi.Name,
+			Quantity:   ci.Quantity,
+			Price:      mi.Price,
+			FinalPrice: mi.FinalPrice,
+		})
+
+		subtotal += itemTotal
+		discount += (itemTotal - finalPrice)
+	}
+
+	delivery := 4900.0
+	gst := subtotal * 0.05
+	finalAmount := subtotal + delivery + gst - discount
+
 	// Create order
 	order := &Order{
 		ID:             uuid.NewString(),
 		UserID:         userID,
 		RestaurantID:   r.ID.Hex(),
 		RestaurantName: r.Name,
-		PaymentMethod:  paymentMethod,
 		Address:        *address,
+		Items:          items,
+		Subtotal:       subtotal,
+		Delivery:       delivery,
+		GST:            gst,
+		Discount:       discount,
+		FinalAmount:    finalAmount,
+		PaymentMethod:  paymentMethod,
 		Status:         "PLACED",
 		CreatedAt:      time.Now(),
 	}
