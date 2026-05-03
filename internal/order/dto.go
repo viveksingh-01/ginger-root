@@ -1,6 +1,9 @@
 package order
 
-import "github.com/viveksingh-01/ginger-root/internal/address"
+import (
+	"github.com/viveksingh-01/ginger-root/internal/address"
+	"github.com/viveksingh-01/ginger-root/internal/cart"
+)
 
 type OrderRequest struct {
 	CartID        string `json:"cartId" binding:"required"`
@@ -13,7 +16,7 @@ type OrderResponse struct {
 	RestaurantID   string                  `json:"restaurantId"`
 	RestaurantName string                  `json:"restaurantName"`
 	Address        address.AddressResponse `json:"address"`
-	Items          []OrderItem             `json:"items"`
+	Items          []cart.Item             `json:"items"`
 	BillDetails    BillDetails             `json:"billDetails"`
 	Status         string                  `json:"status"`
 }
@@ -24,4 +27,10 @@ type BillDetails struct {
 	GST            float64 `json:"gst"`
 	Discount       float64 `json:"discount"`
 	FinalAmount    float64 `json:"finalAmount"`
+}
+
+type Response struct {
+	StatusCode    int            `json:"statusCode"`
+	StatusMessage string         `json:"statusMessage"`
+	Data          *OrderResponse `json:"data,omitempty"`
 }
