@@ -1,6 +1,9 @@
 package order
 
-import "github.com/viveksingh-01/ginger-root/internal/address"
+import (
+	"github.com/viveksingh-01/ginger-root/internal/address"
+	"github.com/viveksingh-01/ginger-root/internal/cart"
+)
 
 func ToOrderResponse(o *Order) *OrderResponse {
 	return &OrderResponse{
@@ -18,7 +21,7 @@ func ToOrderResponse(o *Order) *OrderResponse {
 			Lat:        o.Address.Lat,
 			Lng:        o.Address.Lng,
 		},
-		Items: o.Items,
+		Items: toCartItems(o.Items),
 		BillDetails: BillDetails{
 			Subtotal:       o.Subtotal,
 			DeliveryCharge: o.Delivery,
@@ -28,4 +31,18 @@ func ToOrderResponse(o *Order) *OrderResponse {
 		},
 		Status: o.Status,
 	}
+}
+
+func toCartItems(items []OrderItem) []cart.Item {
+	out := make([]cart.Item, 0, len(items))
+	for _, it := range items {
+		out = append(out, cart.Item{
+			MenuItemID: it.MenuItemID,
+			Name:       it.Name,
+			Quantity:   it.Quantity,
+			Total:      it.Price * it.Quantity,
+			FinalPrice: it.FinalPrice,
+		})
+	}
+	return out
 }
