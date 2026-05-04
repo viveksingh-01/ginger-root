@@ -18,7 +18,10 @@ func (h *Handler) PlaceOrder(c *gin.Context) {
 	var req OrderRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, &Response{
+			StatusCode:    1,
+			StatusMessage: err.Error(),
+		})
 		return
 	}
 
@@ -33,11 +36,18 @@ func (h *Handler) PlaceOrder(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, &Response{
+			StatusCode:    1,
+			StatusMessage: err.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, order)
+	c.JSON(http.StatusOK, Response{
+		StatusCode:    0,
+		StatusMessage: "fetched successfully",
+		Data:          ToOrderResponse(order),
+	})
 }
 
 func toString(v any) string {
