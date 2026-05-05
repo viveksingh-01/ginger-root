@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/viveksingh-01/ginger-root/internal/address"
 	"github.com/viveksingh-01/ginger-root/internal/auth"
+	"github.com/viveksingh-01/ginger-root/internal/cart"
 	"github.com/viveksingh-01/ginger-root/internal/config"
 	"github.com/viveksingh-01/ginger-root/internal/health"
 	"github.com/viveksingh-01/ginger-root/internal/menu"
@@ -70,9 +71,15 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 	restaurantMenuHandler := restaurantmenu.NewHandler(restaurantMenuService)
 	restaurantmenu.RegisterRoutes(apiPath, restaurantMenuHandler)
 
+	cartRepo := cart.NewRepository(db)
+	cartService := cart.NewService(cartRepo, menuService, restaurantService, authService)
+	cartHandler := cart.NewHandler(cartService)
+	cart.RegisterRoutes(apiPath, cartHandler)
+
 	apiPath.Use(AuthMiddleware())
 	{
 		auth.RegisterMeHandler(apiPath, authHandler)
+
 		// Register Address route
 		addressRepo := address.NewRepository(db)
 		addressService := address.NewService(addressRepo)
