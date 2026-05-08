@@ -17,6 +17,7 @@ import (
 	"github.com/viveksingh-01/ginger-root/internal/config"
 	"github.com/viveksingh-01/ginger-root/internal/health"
 	"github.com/viveksingh-01/ginger-root/internal/menu"
+	"github.com/viveksingh-01/ginger-root/internal/order"
 	"github.com/viveksingh-01/ginger-root/internal/restaurant"
 	"github.com/viveksingh-01/ginger-root/internal/restaurantmenu"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -86,6 +87,11 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 		addressService := address.NewService(addressRepo)
 		addressHandler := address.NewHandler(addressService)
 		address.RegisterRoutes(apiPath, addressHandler)
+
+		orderRepo := order.NewRepository(db)
+		orderService := order.NewService(orderRepo, cartRepo, menuService, restaurantService, addressService)
+		orderHandler := order.NewHandler(orderService)
+		order.RegisterRoutes(apiPath, orderHandler)
 	}
 
 	server := &http.Server{
