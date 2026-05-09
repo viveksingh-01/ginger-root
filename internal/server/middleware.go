@@ -82,3 +82,32 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// OptionalAuth tries to authenticate a request if an Authorization header is present.
+// If token validation succeeds, it injects `userId` into the request context.
+func OptionalAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+
+		if authHeader == "" {
+			c.Next()
+			return
+		}
+
+		// Validate format: Bearer <token>
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.Abort()
+			return
+		}
+
+		token := parts[1]
+		claims, err := auth.ValidateToken(token)
+
+		if err == nil {
+			c.Set("userId", claims.UserID)
+		}
+
+		c.Next()
+	}
+}
