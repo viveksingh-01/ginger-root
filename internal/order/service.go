@@ -116,5 +116,10 @@ func (s *Service) PlaceOrder(ctx context.Context, userID, cartID, addressID, pay
 		return nil, err
 	}
 
+	// Delete the cart once order is created
+	if err := s.cartRepo.DeleteByID(ctx, cartID); err != nil {
+		return nil, err
+	}
+
 	return order, nil
 }
