@@ -82,3 +82,16 @@ func (r *Repository) FindCartByID(ctx context.Context, cartID string) (*Cart, er
 	}
 	return &cart, nil
 }
+
+func (r *Repository) DeleteByID(ctx context.Context, cartID string) error {
+	objID, err := bson.ObjectIDFromHex(cartID)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.collection.DeleteOne(ctx, bson.M{"_id": objID})
+	if err != nil {
+		return err
+	}
+	return nil
+}
