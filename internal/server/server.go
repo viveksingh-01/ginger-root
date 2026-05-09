@@ -76,7 +76,10 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 	cartRepo := cart.NewRepository(db)
 	cartService := cart.NewService(cartRepo, menuService, restaurantService, authService)
 	cartHandler := cart.NewHandler(cartService)
-	cart.RegisterRoutes(apiPath, cartHandler)
+	apiPath.Use(OptionalAuth())
+	{
+		cart.RegisterRoutes(apiPath, cartHandler)
+	}
 
 	apiPath.Use(AuthMiddleware())
 	{
