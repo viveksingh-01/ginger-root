@@ -13,6 +13,7 @@ type OrderRequest struct {
 
 type OrderResponse struct {
 	ID             string                  `json:"id"`
+	OrderID        int                     `json:"orderId"`
 	RestaurantID   string                  `json:"restaurantId"`
 	RestaurantName string                  `json:"restaurantName"`
 	Address        address.AddressResponse `json:"address"`

@@ -8,6 +8,7 @@ import (
 
 type Order struct {
 	ID             string          `bson:"id" json:"id"`
+	OrderID        int             `bson:"orderId" json:"orderId"`
 	UserID         string          `bson:"userId,omitempty"`
 	GuestID        string          `bson:"guestId,omitempty"`
 	RestaurantID   string          `bson:"restaurantId"`

@@ -8,6 +8,7 @@ import (
 func ToOrderResponse(o *Order) *OrderResponse {
 	return &OrderResponse{
 		ID:             o.ID,
+		OrderID:        o.OrderID,
 		RestaurantID:   o.RestaurantID,
 		RestaurantName: o.RestaurantName,
 		Address: address.AddressResponse{
