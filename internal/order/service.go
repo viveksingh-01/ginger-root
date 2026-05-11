@@ -94,9 +94,15 @@ func (s *Service) PlaceOrder(ctx context.Context, userID, cartID, addressID, pay
 	gst := subtotal * 0.05
 	finalAmount := subtotal + delivery + gst - discount
 
+	orderID, err := s.repo.NextOrderID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	// Create order
 	order := &Order{
 		ID:             uuid.NewString(),
+		OrderID:        orderID,
 		UserID:         userID,
 		RestaurantID:   r.ID.Hex(),
 		RestaurantName: r.Name,
