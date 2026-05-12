@@ -53,3 +53,11 @@ func (s *Service) GetAddress(ctx context.Context, addressID string) (*Address, e
 	}
 	return addr, nil
 }
+
+func (s *Service) DeleteAddress(ctx context.Context, addressID string) error {
+	objID, err := bson.ObjectIDFromHex(addressID)
+	if err != nil {
+		return err
+	}
+	return s.repo.DeleteByID(ctx, objID)
+}
