@@ -64,3 +64,15 @@ func (r *Repository) FindByID(ctx context.Context, addressID string) (*Address, 
 
 	return &addr, nil
 }
+
+func (r *Repository) DeleteByID(ctx context.Context, addressID bson.ObjectID) error {
+	_, err := r.collection.DeleteOne(ctx, bson.M{"_id": addressID})
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return ErrAddressNotFound
+		}
+		return err
+	}
+
+	return nil
+}
