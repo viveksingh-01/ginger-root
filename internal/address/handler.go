@@ -63,3 +63,20 @@ func (h *Handler) GetAddresses(c *gin.Context) {
 		Data:          resp,
 	})
 }
+
+func (h *Handler) DeleteAddress(c *gin.Context) {
+	addressId := c.Param("addressId")
+	err := h.service.DeleteAddress(c, addressId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, &Response{
+			StatusCode:    1,
+			StatusMessage: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, &Response{
+		StatusCode:    0,
+		StatusMessage: "Address deleted successfully",
+	})
+}
