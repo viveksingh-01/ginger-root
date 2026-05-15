@@ -34,7 +34,7 @@ func New(cfg *config.Config, db *mongo.Database) *Server {
 	// Enable CORS
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{cfg.AllowedOrigin},
-		AllowMethods:     []string{"GET", "OPTIONS"},
+		AllowMethods:     []string{"GET", "OPTIONS", "POST", "DELETE"},
 		AllowHeaders:     []string{"Content-Type", "Authorization", "X-Guest-Id"},
 		ExposeHeaders:    []string{"X-Guest-Id"},
 		AllowCredentials: true,
