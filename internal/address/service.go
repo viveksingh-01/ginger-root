@@ -47,11 +47,12 @@ func (s *Service) GetAddresses(ctx context.Context, userId string) ([]*Address, 
 }
 
 func (s *Service) GetAddress(ctx context.Context, addressID string) (*Address, error) {
-	addr, err := s.repo.FindByID(ctx, addressID)
+	objID, err := bson.ObjectIDFromHex(addressID)
 	if err != nil {
 		return nil, err
 	}
-	return addr, nil
+
+	return s.repo.FindByID(ctx, objID)
 }
 
 func (s *Service) DeleteAddress(ctx context.Context, addressID string) error {
