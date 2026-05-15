@@ -29,6 +29,7 @@ func (h *Handler) AddToCart(c *gin.Context) {
 
 	if val, exists := c.Get("userId"); exists {
 		userID = val.(string)
+		guestID = ""
 	} else {
 		guestID = c.GetHeader("X-Guest-Id")
 		if guestID == "" {
