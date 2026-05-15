@@ -47,14 +47,9 @@ func (r *Repository) GetByUserID(ctx context.Context, userId bson.ObjectID) ([]*
 
 var ErrAddressNotFound = errors.New("address not found")
 
-func (r *Repository) FindByID(ctx context.Context, addressID string) (*Address, error) {
-	objID, err := bson.ObjectIDFromHex(addressID)
-	if err != nil {
-		return nil, err
-	}
-
+func (r *Repository) FindByID(ctx context.Context, addressID bson.ObjectID) (*Address, error) {
 	var addr Address
-	err = r.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&addr)
+	err := r.collection.FindOne(ctx, bson.M{"_id": addressID}).Decode(&addr)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, ErrAddressNotFound
