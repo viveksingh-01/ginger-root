@@ -21,6 +21,18 @@ func (r *Repository) Create(ctx context.Context, order *Order) error {
 	return err
 }
 
+func (r *Repository) FindByOrderID(ctx context.Context, orderID int) (*Order, error) {
+	var order Order
+	err := r.collection.FindOne(ctx, bson.M{"orderId": orderID}).Decode(&order)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrOrderNotFound
+		}
+		return nil, err
+	}
+	return &order, nil
+}
+
 // Returns the next 6-digit order id in [100000, 999999] (Uses an atomic counter in MongoDB)
 // Unique per sequence until 900000 orders have been issued (then ids repeat).
 func (r *Repository) NextOrderID(ctx context.Context) (int, error) {
