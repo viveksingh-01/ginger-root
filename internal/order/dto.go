@@ -35,3 +35,15 @@ type Response struct {
 	StatusMessage string         `json:"statusMessage"`
 	Data          *OrderResponse `json:"data,omitempty"`
 }
+
+type OrderStatusEvent struct {
+	OrderID        int    `json:"orderId"`
+	RestaurantName string `json:"restaurantName"`
+	Status         string `json:"status"`
+	Title          string `json:"title"`
+	Subtitle       string `json:"subtitle,omitempty"`
+	Step           int    `json:"step"`
+	TotalSteps     int    `json:"totalSteps"`
+	IsTerminal     bool   `json:"isTerminal"`
+	UpdatedAt      string `json:"updatedAt"`
+}
