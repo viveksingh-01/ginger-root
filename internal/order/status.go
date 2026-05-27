@@ -63,3 +63,12 @@ var statusPipeline = []StatusStep{
 		Delay:    0,
 	},
 }
+
+func StatusIndex(status string) int {
+	for i, step := range statusPipeline {
+		if step.Status == status {
+			return i
+		}
+	}
+	return 0
+}
