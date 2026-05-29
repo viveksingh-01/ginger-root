@@ -33,6 +33,15 @@ func (r *Repository) FindByOrderID(ctx context.Context, orderID int) (*Order, er
 	return &order, nil
 }
 
+func (r *Repository) UpdateStatus(ctx context.Context, orderID int, status string) error {
+	_, err := r.collection.UpdateOne(
+		ctx,
+		bson.M{"orderId": orderID},
+		bson.M{"$set": bson.M{"status": status}},
+	)
+	return err
+}
+
 // Returns the next 6-digit order id in [100000, 999999] (Uses an atomic counter in MongoDB)
 // Unique per sequence until 900000 orders have been issued (then ids repeat).
 func (r *Repository) NextOrderID(ctx context.Context) (int, error) {
