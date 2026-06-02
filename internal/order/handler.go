@@ -94,6 +94,24 @@ func (h *Handler) TrackOrderStatus(c *gin.Context) {
 	if c.Writer.Written() {
 		return
 	}
+
+	switch {
+	case errors.Is(streamErr, ErrOrderNotFound):
+		c.JSON(http.StatusNotFound, gin.H{
+			"statusCode":    1,
+			"statusMessage": streamErr.Error(),
+		})
+	case errors.Is(streamErr, ErrOrderForbidden):
+		c.JSON(http.StatusForbidden, gin.H{
+			"statusCode":    1,
+			"statusMessage": streamErr.Error(),
+		})
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"statusCode":    1,
+			"statusMessage": streamErr.Error(),
+		})
+	}
 }
 
 func parseOrderID(s string) (int, error) {
