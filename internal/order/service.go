@@ -129,3 +129,62 @@ func (s *Service) PlaceOrder(ctx context.Context, userID, cartID, addressID, pay
 
 	return order, nil
 }
+
+// Each stage is persisted and sent over SSE; delays between stages simulate live progression until DELIVERED.
+func (s *Service) StreamOrderStatus(
+	ctx context.Context,
+	userID string,
+	orderID int,
+	emit func(OrderStatusEvent) error,
+) error {
+	order, err := s.repo.FindByOrderID(ctx, orderID)
+	if err != nil {
+		return err
+	}
+	if order.UserID != userID {
+		return ErrOrderForbidden
+	}
+
+	total := len(statusPipeline)
+	start := StatusIndex(order.Status)
+
+	for i := start; i < total; i++ {
+		step := statusPipeline[i]
+		ev := OrderStatusEvent{
+			OrderID:        orderID,
+			RestaurantName: order.RestaurantName,
+			Status:         step.Status,
+			Title:          step.Title,
+			Subtitle:       step.Subtitle,
+			Step:           i + 1,
+			TotalSteps:     total,
+			IsTerminal:     step.Status == StatusDelivered,
+			UpdatedAt:      time.Now().UTC().Format(time.RFC3339),
+		}
+
+		if err := emit(ev); err != nil {
+			return err
+		}
+
+		if step.Status != order.Status {
+			if err := s.repo.UpdateStatus(ctx, orderID, step.Status); err != nil {
+				return err
+			}
+			order.Status = step.Status
+		}
+
+		if step.Status == StatusDelivered {
+			return nil
+		}
+
+		if i < total-1 && step.Delay > 0 {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(step.Delay):
+			}
+		}
+	}
+
+	return nil
+}
