@@ -44,6 +44,7 @@ type OrderStatusEvent struct {
 	Subtitle       string `json:"subtitle,omitempty"`
 	Step           int    `json:"step"`
 	TotalSteps     int    `json:"totalSteps"`
+	ETA            int    `json:"eta"`
 	IsTerminal     bool   `json:"isTerminal"`
 	UpdatedAt      string `json:"updatedAt"`
 }
