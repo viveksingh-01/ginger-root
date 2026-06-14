@@ -158,6 +158,7 @@ func (s *Service) StreamOrderStatus(
 			Subtitle:       step.Subtitle,
 			Step:           i + 1,
 			TotalSteps:     total,
+			ETA:            step.ETAMinutes,
 			IsTerminal:     step.Status == StatusDelivered,
 			UpdatedAt:      time.Now().UTC().Format(time.RFC3339),
 		}
